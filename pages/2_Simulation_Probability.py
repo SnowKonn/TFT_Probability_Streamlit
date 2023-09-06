@@ -177,7 +177,7 @@ def set_find_info_dict(cost: int, n: int, init=False):
         find_info_dict[cost] = n
         temp_find_info_dict = find_info_dict.copy()
     else:
-        find_info_dict[cost] = n
+        find_info_dict[cost] += n
         temp_find_info_dict = find_info_dict.copy()
     return temp_find_info_dict
 
@@ -189,9 +189,6 @@ def get_find_info_list(target_info_dict: dict):
         for j in range(n):
             result_list.append(str(i) + string.ascii_lowercase[j])
     return result_list
-
-
-minimum_satisfied_thr = 2
 
 
 def initialize_peices_bag():
@@ -240,7 +237,34 @@ def check_indiv_condition(player_list, target_element, target_pieces_n):
         return False
 
 
+def check_indiv_condition_by_list(player_list, target_element_list: list, target_pieces_list: list):
+    for i in range(len(target_element_list)):
+        i_result = int(sum(map(lambda x: x in [target_element_list[i]], player_list)) >= target_pieces_list[i])
+
+        if i_result:
+            return True
+        else:
+            return False
+
+
 if __name__ == "__main__":
+
+
+    st.set_page_config(
+        page_title="Roll Expectation",
+        page_icon="👋",
+    )
+
+    st.write("# How many times do I re-roll? :revolving_hearts:")
+    st.sidebar.success("Select a demo above.")
+
+    st.markdown(
+        """
+        How many rolls do you need to acquire the specific pieces? \n
+        Use the information below to find out the expected number of re-rolls. \n
+        Good luck, everyone!:star: """
+    )
+    st.divider()
 
     max_pieces_chart = pd.read_excel('Data/Probability Chart.xlsx', 'Max N', index_col=0)
     probability_chart = pd.read_excel('Data/Probability Chart.xlsx', 'Probability Cost', index_col=0)
@@ -250,39 +274,166 @@ if __name__ == "__main__":
     np.dot(max_pieces_chart.iloc[0, :], max_pieces_chart.iloc[1, :])
     player_list = [i for i in range(8)]
 
-    lv_bag = {}
-    pl_bag = {}
-    for k in probability_chart.index:
-        k = int(k)
-        setted_lv_sample = []
-        for j in range(MAX_COST):
-            setted_lv_sample = setted_lv_sample + ([j + 1] * int(probability_chart.iloc[k - 1, j] * 100))
+    st.write('- Please set lobby info')
 
-        lv_bag[k] = setted_lv_sample.copy()
+    col1, col2 = st.columns([1, 1])
 
-    exhast_all_cost = 5
-    setted_lv_sample = list(filter(lambda x: x != exhast_all_cost, setted_lv_sample))
+    with col1:
+        already_sold_ratio_option = st.selectbox(
+            "N people same comp",
+            options=(0, 1, 2, 3),
+        )
+        dead_option = st.selectbox(
+            "N of the dead players",
+            (0, 1, 2, 3, 4, 5, 6),
+            key='dead_players',
+            index=0
+        )
 
-    lv_set = 4
-    others_lv_set = 5
+    with col2:
+        lv_option = st.selectbox(
+            "Select Your Lv",
+            (1, 2, 3, 4, 5, 6, 7, 8, 9),
+            key='Level',
+            index=6
+        )
+        lv_option_others = st.selectbox(
+            "Other player's average Lv",
+            (1, 2, 3, 4, 5, 6, 7, 8, 9),
+            key='Level_others',
+            index=6
+        )
+        av_field_cost_option_others = st.selectbox(
+            "Average field Cost on the stage",
+            (10, 20, 30, 40, 50, 60, 70),
+            key='Field_cost',
+            index=2
+        )
+
+    st.write('- Insert the number of kinds of champions you need')
+
+    finding_n_option = st.selectbox(
+        "N Types of Champions",
+        (1, 2, 3),
+        key='finding_n',
+        index=0
+    )
+    st.write('- Please specify the cost and quantity of each required champion')
+    col2_1, col2_2 = st.columns([1, 1])
+    a_cost_list = []
+    a_n_pieces_list = []
+
+    with col2_1:
+        cost_option1 = st.selectbox(
+            "Cost of the piece",
+            (1, 2, 3, 4, 5),
+            key='cost1',
+            index=3
+        )
+
+    with col2_2:
+        finding_n1 = st.selectbox(
+            "How many do you want?",
+            (1, 2, 3, 4, 5, 6, 7, 8, 9),
+            key='finding_n1',
+            index=0
+        )
+        a_cost_list.append(cost_option1)
+        a_n_pieces_list.append(finding_n1)
+
+    if finding_n_option > 1:
+        col3_1, col3_2 = st.columns([1, 1])
+
+        with col3_1:
+            cost_option2 = st.selectbox(
+                "Cost of the piece",
+                (1, 2, 3, 4, 5),
+                key='cost2',
+                index=3
+            )
+
+        with col3_2:
+            finding_n2 = st.selectbox(
+                "How many do you want?",
+                (1, 2, 3, 4, 5, 6, 7, 8, 9),
+                key='finding_n2',
+                index=0
+            )
+            a_cost_list.append(cost_option2)
+            a_n_pieces_list.append(finding_n2)
+
+    if finding_n_option > 2:
+        col4_1, col4_2 = st.columns([1, 1])
+
+        with col4_1:
+            cost_option3 = st.selectbox(
+                "Cost of the piece",
+                (1, 2, 3, 4, 5),
+                key='cost3',
+                index=3
+            )
+
+        with col4_2:
+            finding_n3 = st.selectbox(
+                "How many do you want?",
+                (1, 2, 3, 4, 5, 6, 7, 8, 9),
+                key='finding_n3',
+                index=0
+            )
+            a_cost_list.append(cost_option3)
+            a_n_pieces_list.append(finding_n3)
+
+    st.write("- How many of the conditions right above(champion specific option) should be met?")
+    fin_condition_option = st.selectbox(
+        "N of terminal condition",
+        (k for k in range(1, finding_n_option+1)),
+        key='fin_condition',
+        index=0
+    )
+
+    # max_pieces_chart
+
+    lv_set = lv_option
+    others_lv_set = lv_option_others
     cost = 1
     target_pool_n = 4
-    target_pieces_n = 9
+    target_pieces_n = 1
     target_class_n = 3
 
-    avg_field_room_cost = 15
-    competitors_n = 0
-    dead_pl_n = 0
+    avg_field_room_cost = av_field_cost_option_others
+    competitors_n = already_sold_ratio_option
+    dead_pl_n = dead_option
     no_head_rate = 0.9
 
     simul_n = 100
-
-    target_dict = set_find_info_dict(cost=cost, n=target_pool_n, init=True)
+    target_info_df = pd.DataFrame([a_cost_list, a_n_pieces_list], index=['Cost', 'N']).T.sort_values(by='Cost')
+    a_cost_list = target_info_df['Cost'].tolist()
+    a_n_pieces_list = target_info_df['N'].tolist()
+    for q in range(len(a_cost_list)):
+        if q == 0:
+            target_dict = set_find_info_dict(cost=a_cost_list[q], n=1, init=True)
+        else:
+            target_dict = set_find_info_dict(cost=a_cost_list[q], n=1, init=False)
     target_list = get_find_info_list(target_dict)
 
-    result_cost_list_total = []
+    # st.write(target_list)
 
+    result_cost_list_total = []
+    # Set the other player's condition
     for iq in range(simul_n):
+
+        lv_bag = {}
+        pl_bag = {}
+        for k in probability_chart.index:
+            k = int(k)
+            setted_lv_sample = []
+            for j in range(MAX_COST):
+                setted_lv_sample = setted_lv_sample + ([j + 1] * int(probability_chart.iloc[k - 1, j] * 100))
+
+            lv_bag[k] = setted_lv_sample.copy()
+
+        exhast_all_cost = 5
+        setted_lv_sample = list(filter(lambda x: x != exhast_all_cost, setted_lv_sample))
         pieces_bag = initialize_peices_bag()
 
         for i in range(1, 8):
@@ -314,8 +465,8 @@ if __name__ == "__main__":
                         i_th_field_room_cost += temp_peice_cost
 
         total_cost = 0
-        i = 0
-        pl_bag[i] = []
+        i_ = 0
+        pl_bag[i_] = []
         terminal_condition = False
 
         while (total_cost < 300) and (not terminal_condition):
@@ -327,41 +478,30 @@ if __name__ == "__main__":
                     exhast_all_cost = p
                     lv_bag[lv_set] = list(filter(lambda x: x != exhast_all_cost, lv_bag[lv_set]))
                 p = random.choice(lv_bag[lv_set])
+                # print(pieces_bag)
+                # print(p)
+                # print(pl_bag)
                 p_th_pieces = random.choice(pieces_bag[p])
-                if p_th_pieces in target_list:
-                    if check_indiv_condition(pl_bag[i], p_th_pieces, target_pieces_n):
-                        pass
-                    else:
-                        pl_bag[i].append(p_th_pieces)
-                        pieces_bag[p].remove(p_th_pieces)
-                        # total_cost += p
+                if check_indiv_condition(pl_bag[i_], target_list, target_pieces_n):
+                    pass
+                else:
+                    pl_bag[i_].append(p_th_pieces)
+                    pieces_bag[p].remove(p_th_pieces)
+                    # total_cost += p
             total_cost += 1
 
-            terminal_condition = check_terminal_condition(pl_bag[i], target_list, target_class_n=target_class_n,
-                                                          target_pieces_n=target_pieces_n)
+            terminal_condition = check_terminal_condition(pl_bag[i_], target_list, target_class_n=fin_condition_option,
+                                                          target_pieces_n=a_n_pieces_list)
 
         result_cost_list_total.append(total_cost)
 
+    # st.write(pl_bag)
+
     result_array = np.array(result_cost_list_total)
-    print("Avg:", round(np.mean(result_array), 2))
-    print("Std:", round(np.std(result_array), 2))
+    st.write("Avg:", round(np.mean(result_array), 2))
+    st.write("Std:", round(np.std(result_array), 2))
 
 
-    st.set_page_config(
-        page_title="Roll Expectation",
-        page_icon="👋",
-    )
-
-    st.write("# How many times do I re-roll? :revolving_hearts:")
-    st.sidebar.success("Select a demo above.")
-
-    st.markdown(
-        """
-        How many rolls do you need to acquire the specific pieces? \n
-        Use the information below to find out the expected number of re-rolls. \n
-        Good luck, everyone!:star: """
-    )
-    st.divider()
 
     fig, ax = plt.subplots()
     ax.hist(result_array)

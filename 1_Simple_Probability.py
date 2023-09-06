@@ -99,7 +99,7 @@ def cal_prob_target(lv, piece_cost, finding_n, already_sold_ratio, n_slot=5):
     geo_std = np.sqrt((1 - p_t) / p_t ** 2)
     if geo_mean < 40:
         mean_coordinate = (int(np.round(geo_mean, 0)), prob_cal(p_t, int(np.round(geo_mean, 0))))
-        ax.plot( *mean_coordinate, 'go', label='Mean')
+        ax.plot( *mean_coordinate, 'bo', label='Average')
     ax.legend()
 
     # print(f'probability {np.round(p_t * 100, 2)}%')
@@ -168,7 +168,7 @@ if __name__ == "__main__":
 
     st.markdown(
         """
-        How many rolls do you need to acquire the specific pieces? \n
+        How many rolls do you need to acquire the specific champions? \n
         Use the information below to find out the expected number of re-rolls. \n
         Good luck, everyone!:star: """
     )
@@ -210,7 +210,7 @@ if __name__ == "__main__":
 
     with col4:
         finding_n_option = st.selectbox(
-            "N Types of pieces",
+            "N Types of champions",
             (1, 2, 3, 4, 5, 6, 7, 8, 9),
             key='finding_n',
             index=2
@@ -227,7 +227,7 @@ if __name__ == "__main__":
         f"""
         - The probability of the desired piece appearing in the shop is **{np.round(stats['P']*100, 1)}%**.
         - On average, you need to re-roll **{np.round(stats['Mean'],1)}** times. 
-        - With 50% likelihood, you need to reroll **{np.round(stats['Median'],1)}** to get the pieces.
+        - With 50% likelihood, you need to reroll **{np.round(stats['Median'],1)}** to get the champions.
         - If you've re-rolled more than **{np.round(stats['Mean'] + stats['Std'],1)}** and still haven't gotten it, that's unlucky.
         """
                 )
