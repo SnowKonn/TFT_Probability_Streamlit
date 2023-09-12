@@ -405,7 +405,7 @@ if __name__ == "__main__":
     dead_pl_n = dead_option
     no_head_rate = 0.9
 
-    simul_n = 100
+    simul_n = 200
     target_info_df = pd.DataFrame([a_cost_list, a_n_pieces_list], index=['Cost', 'N']).T.sort_values(by='Cost')
     a_cost_list = target_info_df['Cost'].tolist()
     a_n_pieces_list = target_info_df['N'].tolist()
