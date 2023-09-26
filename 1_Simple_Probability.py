@@ -246,7 +246,7 @@ if __name__ == "__main__":
         - **LV**: Your level when rerolling
         - **Cost**: The cost of the piece you want to draw
         - **N types of pieces**: The number of different types of pieces you need. \n
-            - Example: If you need both Ryze and Sion, It is 2.
+            - Example: If you need both Ryze or Sion, It is 2.
         \n \n
         """
     )
