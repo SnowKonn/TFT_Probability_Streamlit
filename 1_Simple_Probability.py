@@ -29,14 +29,6 @@ headers = {
 }
 
 
-def make_pretty(styler):
-    styler.format(formatter=lambda x: '{:.0f}%'.format(x * 100))
-    styler.background_gradient(cmap='Blues', axis=1)
-    styler.set_table_styles([table_align, cell_hover, index_names, headers] + font_size_setting)
-
-    return styler
-
-
 def df_stat_style(styler):
     styler.format(formatter=lambda x: '{:.1f}%'.format(x * 100) if x < 1 else '{:.1f}'.format(x))
     styler.set_table_styles([table_align, cell_hover, index_names, headers] + font_size_setting)
@@ -109,51 +101,6 @@ def cal_prob_target(lv, piece_cost, finding_n, already_sold_ratio, n_slot=5):
     stats = {'P': probability_target, 'Median': geo_median, 'Mean': geo_mean, 'Std': geo_std}
 
     return probability_target, fig, ax, stats
-
-
-# Show All Costs
-
-@st.cache_resource
-def get_plot_target_all_costs(lv, finding_n, already_sold_ratio, n_slot=5):
-    fig, ax = plt.subplots()
-    for piece_cost in range(1, 6):
-        n_class = max_pieces_chart.loc['Piece Class N', piece_cost]
-
-        prob_unit = probability_chart.loc[lv, piece_cost]
-        finding_ratio = finding_n / n_class
-        the_other_cost_probability = sum(probability_chart.loc[lv, probability_chart.columns.difference([piece_cost])])
-
-        probability_target = 1 - (prob_unit * (
-                    1 - finding_ratio) + finding_ratio * already_sold_ratio * prob_unit + the_other_cost_probability) ** n_slot
-
-        p_t = probability_target
-        probability_list = []
-        p_temp = 0
-        for i in range(40):
-            #     print(f'{np.round(p_temp*100,2)}%')
-            probability_list.append(p_temp)
-            p_temp = p_temp + (1 - p_t) ** (i) * p_t
-
-        color_plot = 'k'
-        if piece_cost == 1: color_plot = 'gray'
-        if piece_cost == 2: color_plot = 'g'
-        if piece_cost == 3: color_plot = 'b'
-        if piece_cost == 4: color_plot = 'purple'
-        if piece_cost == 5: color_plot = 'y'
-
-        ax.plot(probability_list, '-.', color=color_plot)
-
-        ax.tick_params(axis='x', direction='in', which='both')
-        ax.tick_params(axis='y', direction='in', which='both')
-        ax.spines[['top']].set_visible(False)
-        ax.spines[['right']].set_visible(False)
-        ax.set_ylim([0, 1])
-        ax.set_xlim([0, 40])
-        ax.grid(linestyle='--')
-
-    return fig, ax
-
-
 
 
 if __name__ == "__main__":
