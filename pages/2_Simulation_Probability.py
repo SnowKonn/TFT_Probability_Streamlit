@@ -395,175 +395,175 @@ if __name__ == "__main__":
 
     lv_set = lv_option
     others_lv_set = lv_option_others
-    cost = 1
-    target_pool_n = 4
-    target_pieces_n = 1
-    target_class_n = 3
 
     avg_field_room_cost = av_field_cost_option_others
     competitors_n = already_sold_ratio_option
     dead_pl_n = dead_option
     no_head_rate = 0.9
 
-    simul_n = 200
-    target_info_df = pd.DataFrame([a_cost_list, a_n_pieces_list], index=['Cost', 'N']).T.sort_values(by='Cost')
-    a_cost_list = target_info_df['Cost'].tolist()
-    a_n_pieces_list = target_info_df['N'].tolist()
-    for q in range(len(a_cost_list)):
-        if q == 0:
-            target_dict = set_find_info_dict(cost=a_cost_list[q], n=1, init=True)
-        else:
-            target_dict = set_find_info_dict(cost=a_cost_list[q], n=1, init=False)
-    target_list = get_find_info_list(target_dict)
 
-    # st.write(target_list)
+    if st.button('Run'):
+            
 
-    result_cost_list_total = []
-    # Set the other player's condition
-    for iq in range(simul_n):
+        simul_n = 300
+        target_info_df = pd.DataFrame([a_cost_list, a_n_pieces_list], index=['Cost', 'N']).T.sort_values(by='Cost')
+        a_cost_list = target_info_df['Cost'].tolist()
+        a_n_pieces_list = target_info_df['N'].tolist()
+        for q in range(len(a_cost_list)):
+            if q == 0:
+                target_dict = set_find_info_dict(cost=a_cost_list[q], n=1, init=True)
+            else:
+                target_dict = set_find_info_dict(cost=a_cost_list[q], n=1, init=False)
+        target_list = get_find_info_list(target_dict)
+        champ_specific_condition = dict(zip(target_list, a_n_pieces_list))
+        # st.write(target_list)
 
-        lv_bag = {}
-        pl_bag = {}
-        for k in probability_chart.index:
-            k = int(k)
-            setted_lv_sample = []
-            for j in range(MAX_COST):
-                setted_lv_sample = setted_lv_sample + ([j + 1] * int(probability_chart.iloc[k - 1, j] * 100))
+        result_cost_list_total = []
+        # Set the other player's condition
+        for iq in range(simul_n):
 
-            lv_bag[k] = setted_lv_sample.copy()
+            lv_bag = {}
+            pl_bag = {}
+            for k in probability_chart.index:
+                k = int(k)
+                setted_lv_sample = []
+                for j in range(MAX_COST):
+                    setted_lv_sample = setted_lv_sample + ([j + 1] * int(probability_chart.iloc[k - 1, j] * 100))
 
-        exhast_all_cost = 5
-        setted_lv_sample = list(filter(lambda x: x != exhast_all_cost, setted_lv_sample))
-        pieces_bag = initialize_peices_bag()
+                lv_bag[k] = setted_lv_sample.copy()
 
-        for i in range(1, 8):
-            pl_bag[i] = []
-            i_th_field_room_cost = 0
-            if i <= competitors_n:
-                while i_th_field_room_cost < avg_field_room_cost:
-                    temp_peice_cost = random.sample(lv_bag[others_lv_set], 1)[0]
-                    selected_peices = random.sample(pieces_bag[temp_peice_cost], 1)[0]
-                    if np.random.binomial(1, no_head_rate):
-                        if selected_peices not in target_list:
-                            continue
+            exhast_all_cost = 5
+            setted_lv_sample = list(filter(lambda x: x != exhast_all_cost, setted_lv_sample))
+            pieces_bag = initialize_peices_bag()
+
+            for i in range(1, 8):
+                pl_bag[i] = []
+                i_th_field_room_cost = 0
+                if i <= competitors_n:
+                    while i_th_field_room_cost < avg_field_room_cost:
+                        temp_peice_cost = random.sample(lv_bag[others_lv_set], 1)[0]
+                        selected_peices = random.sample(pieces_bag[temp_peice_cost], 1)[0]
+                        if np.random.binomial(1, no_head_rate):
+                            if selected_peices not in target_list:
+                                continue
+                            else:
+                                pl_bag[i].append(selected_peices)
+                                pieces_bag[temp_peice_cost].remove(selected_peices)
+                                i_th_field_room_cost += temp_peice_cost
                         else:
                             pl_bag[i].append(selected_peices)
                             pieces_bag[temp_peice_cost].remove(selected_peices)
                             i_th_field_room_cost += temp_peice_cost
-                    else:
-                        pl_bag[i].append(selected_peices)
-                        pieces_bag[temp_peice_cost].remove(selected_peices)
-                        i_th_field_room_cost += temp_peice_cost
-            else:
-                if i < 8 - dead_pl_n:
-                    while i_th_field_room_cost < avg_field_room_cost:
-                        temp_peice_cost = random.sample(lv_bag[others_lv_set], 1)[0]
-                        selected_peices = random.sample(pieces_bag[temp_peice_cost], 1)[0]
-
-                        pl_bag[i].append(selected_peices)
-                        pieces_bag[temp_peice_cost].remove(selected_peices)
-                        i_th_field_room_cost += temp_peice_cost
-
-        total_cost = 0
-        i_ = 0
-        pl_bag[i_] = []
-        terminal_condition = False
-
-        while (total_cost < 300) and (not terminal_condition):
-
-            lv_list_j = random.sample(lv_bag[lv_set], 5)
-
-            for p in lv_list_j:
-                if len(pieces_bag[p]) == 0:
-                    exhast_all_cost = p
-                    lv_bag[lv_set] = list(filter(lambda x: x != exhast_all_cost, lv_bag[lv_set]))
-                p = random.choice(lv_bag[lv_set])
-                # print(pieces_bag)
-                # print(p)
-                # print(pl_bag)
-                p_th_pieces = random.choice(pieces_bag[p])
-                if check_indiv_condition(pl_bag[i_], target_list, target_pieces_n):
-                    pass
                 else:
-                    pl_bag[i_].append(p_th_pieces)
-                    pieces_bag[p].remove(p_th_pieces)
-                    # total_cost += p
-            total_cost += 1
+                    if i < 8 - dead_pl_n:
+                        while i_th_field_room_cost < avg_field_room_cost:
+                            temp_peice_cost = random.sample(lv_bag[others_lv_set], 1)[0]
+                            selected_peices = random.sample(pieces_bag[temp_peice_cost], 1)[0]
 
-            terminal_condition = check_terminal_condition(pl_bag[i_], target_list, target_class_n=fin_condition_option,
-                                                          target_pieces_n=a_n_pieces_list)
+                            pl_bag[i].append(selected_peices)
+                            pieces_bag[temp_peice_cost].remove(selected_peices)
+                            i_th_field_room_cost += temp_peice_cost
 
-        result_cost_list_total.append(total_cost)
+            total_cost = 0
+            i_ = 0
+            pl_bag[i_] = []
+            terminal_condition = False
 
-    # st.write(pl_bag)
+            while (total_cost < 200) and (not terminal_condition):
 
-    result_array = np.array(result_cost_list_total)
-    st.write("Avg:", round(np.mean(result_array), 2))
-    st.write("Std:", round(np.std(result_array), 2))
+                lv_list_j = random.sample(lv_bag[lv_set], 5)
 
+                for p in lv_list_j:
+                    if len(pieces_bag[p]) == 0:
+                        exhast_all_cost = p
+                        lv_bag[lv_set] = list(filter(lambda x: x != exhast_all_cost, lv_bag[lv_set]))
+                    p = random.choice(lv_bag[lv_set])
+                    # print(pieces_bag)
+                    # print(p)
+                    # print(pl_bag)
+                    p_th_pieces = random.choice(pieces_bag[p])
 
-    fig, ax = plt.subplots()
-    result_array.sort()
-    result_df = pd.DataFrame(np.unique(result_array, return_counts=True), ['re_roll', 'count']).T
-    result_df['density_prob'] = result_df['count']/ sum(result_df['count'])
-    result_df['cum_prob'] = result_df['density_prob'].cumsum()
+                    if p_th_pieces in target_list:
+                    
+                        if check_indiv_condition(pl_bag[i_], p_th_pieces, champ_specific_condition[p_th_pieces]):
+                            pass
+                        else:
+                            pl_bag[i_].append(p_th_pieces)
+                            pieces_bag[p].remove(p_th_pieces)
+                            # total_cost += p
+                total_cost += 1
 
-    diff_table = abs(result_df['re_roll'] - np.mean(result_array))
-    min_abs_diff_value = min(diff_table)
-    min_abs_diff_value_index = diff_table.loc[diff_table == min_abs_diff_value].index[0]
-    nearest_values = result_df.loc[min_abs_diff_value_index, 're_roll']
-
-    diff_values = np.mean(result_array) - nearest_values
-    diff_sign = int(np.sign(diff_values))
-
-    mean_info_table = result_df.loc[[min_abs_diff_value_index+diff_sign, min_abs_diff_value_index]][['re_roll', 'cum_prob']].sort_index()
-
-    # 주어진 두 포인트 p1과 p2
-    p1 = mean_info_table.iloc[0].values
-    p2 = mean_info_table.iloc[1].values
-
-    # p3의 X 값
-    x_p3 = np.mean(result_array)
-
-    # p1과 p2를 이용하여 기울기 계산
-    slope = (p2[1] - p1[1]) / (p2[0] - p1[0])
-
-    # p3의 Y 값을 예측
-    y_p3 = p1[1] + (x_p3 - p1[0]) * slope
-
-    mean_coordinate = (x_p3, y_p3)
+                terminal_condition = check_terminal_condition(pl_bag[i_], target_list, target_class_n=fin_condition_option,
+                                                            target_pieces_n=a_n_pieces_list)
 
 
-    ax.plot(result_df['re_roll'], result_df['cum_prob'], label='Cumulative Probability', linewidth=1, color='b',
-            )
-    ax.plot(*mean_coordinate, 'bo', label='Average')
-    ax.grid(linestyle='--')
-    ax2 = ax.twinx()
-    ax2.hist(result_array, density=True, label='Probability Mass(Right)', range=[min(result_df['re_roll']), max(result_df['re_roll'])],
-             bins=15, facecolor='#2ab0ff', edgecolor='#169acf', linewidth=0.5)
-    ax.set_zorder(ax2.get_zorder() + 1)
-    ax.patch.set_visible(False)
-    ax.set_title('Simulation Result')
+            result_cost_list_total.append(total_cost)
+
+        result_array = np.array(result_cost_list_total)
+        st.write("Avg:", round(np.mean(result_array), 2))
+        st.write("Std:", round(np.std(result_array), 2))
 
 
-    # ax.spines[['top']].set_visible(False)
-    # ax2.spines[['top']].set_visible(False)
+        fig, ax = plt.subplots()
+        result_array.sort()
+        result_df = pd.DataFrame(np.unique(result_array, return_counts=True), ['re_roll', 'count']).T
+        result_df['density_prob'] = result_df['count']/ sum(result_df['count'])
+        result_df['cum_prob'] = result_df['density_prob'].cumsum()
 
-    ax.tick_params(axis='x', direction='in', which='both')
-    ax.tick_params(axis='y', direction='in', which='both')
-    ax2.tick_params(axis='x', direction='in', which='both')
-    ax2.tick_params(axis='y', direction='in', which='both')
+        diff_table = abs(result_df['re_roll'] - np.mean(result_array))
+        min_abs_diff_value = min(diff_table)
+        min_abs_diff_value_index = diff_table.loc[diff_table == min_abs_diff_value].index[0]
+        nearest_values = result_df.loc[min_abs_diff_value_index, 're_roll']
 
-    lines, labels = ax.get_legend_handles_labels()
-    lines2, labels2 = ax2.get_legend_handles_labels()
-    ax.set_xlabel('N re-roll')
-    ax.set_ylabel('Cumulative Probabilty')
-    ax2.set_ylabel('Probability')
-    ax.legend(lines + lines2, labels + labels2, loc=0)
+        diff_values = np.mean(result_array) - nearest_values
+        diff_sign = int(np.sign(diff_values))
 
-    plt.show()
-    # st.write(probability_chart.style.pipe(make_pretty), use_container_width=True)
+        mean_info_table = result_df.loc[[min_abs_diff_value_index+diff_sign, min_abs_diff_value_index]][['re_roll', 'cum_prob']].sort_index()
 
-    st.pyplot(fig)
-    # st.write(probability_chart.style.pipe(make_pretty), use_container_width=True)
+        # 주어진 두 포인트 p1과 p2
+        p1 = mean_info_table.iloc[0].values
+        p2 = mean_info_table.iloc[1].values
+
+        # p3의 X 값
+        x_p3 = np.mean(result_array)
+
+        # p1과 p2를 이용하여 기울기 계산
+        slope = (p2[1] - p1[1]) / (p2[0] - p1[0])
+
+        # p3의 Y 값을 예측
+        y_p3 = p1[1] + (x_p3 - p1[0]) * slope
+
+        mean_coordinate = (x_p3, y_p3)
+
+
+        ax.plot(result_df['re_roll'], result_df['cum_prob'], label='Cumulative Probability', linewidth=1, color='b',
+                )
+        ax.plot(*mean_coordinate, 'bo', label='Average')
+        ax.grid(linestyle='--')
+        ax2 = ax.twinx()
+        ax2.hist(result_array, density=True, label='Probability Mass(Right)', range=[min(result_df['re_roll']), max(result_df['re_roll'])],
+                bins=15, facecolor='#2ab0ff', edgecolor='#169acf', linewidth=0.5)
+        ax.set_zorder(ax2.get_zorder() + 1)
+        ax.patch.set_visible(False)
+        ax.set_title('Simulation Result')
+
+
+        # ax.spines[['top']].set_visible(False)
+        # ax2.spines[['top']].set_visible(False)
+
+        ax.tick_params(axis='x', direction='in', which='both')
+        ax.tick_params(axis='y', direction='in', which='both')
+        ax2.tick_params(axis='x', direction='in', which='both')
+        ax2.tick_params(axis='y', direction='in', which='both')
+
+        lines, labels = ax.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax.set_xlabel('N re-roll')
+        ax.set_ylabel('Cumulative Probabilty')
+        ax2.set_ylabel('Probability')
+        ax.legend(lines + lines2, labels + labels2, loc=0)
+        # st.write(probability_chart.style.pipe(make_pretty), use_container_width=True)
+
+        st.pyplot(fig)
+        # st.write(probability_chart.style.pipe(make_pretty), use_container_width=True)
 
