@@ -502,9 +502,68 @@ if __name__ == "__main__":
     st.write("Std:", round(np.std(result_array), 2))
 
 
-
     fig, ax = plt.subplots()
-    ax.hist(result_array)
+    result_array.sort()
+    result_df = pd.DataFrame(np.unique(result_array, return_counts=True), ['re_roll', 'count']).T
+    result_df['density_prob'] = result_df['count']/ sum(result_df['count'])
+    result_df['cum_prob'] = result_df['density_prob'].cumsum()
+
+    diff_table = abs(result_df['re_roll'] - np.mean(result_array))
+    min_abs_diff_value = min(diff_table)
+    min_abs_diff_value_index = diff_table.loc[diff_table == min_abs_diff_value].index[0]
+    nearest_values = result_df.loc[min_abs_diff_value_index, 're_roll']
+
+    diff_values = np.mean(result_array) - nearest_values
+    diff_sign = int(np.sign(diff_values))
+
+    mean_info_table = result_df.loc[[min_abs_diff_value_index+diff_sign, min_abs_diff_value_index]][['re_roll', 'cum_prob']].sort_index()
+
+    # 주어진 두 포인트 p1과 p2
+    p1 = mean_info_table.iloc[0].values
+    p2 = mean_info_table.iloc[1].values
+
+    # p3의 X 값
+    x_p3 = np.mean(result_array)
+
+    # p1과 p2를 이용하여 기울기 계산
+    slope = (p2[1] - p1[1]) / (p2[0] - p1[0])
+
+    # p3의 Y 값을 예측
+    y_p3 = p1[1] + (x_p3 - p1[0]) * slope
+
+    mean_coordinate = (x_p3, y_p3)
+
+
+    ax.plot(result_df['re_roll'], result_df['cum_prob'], label='Cumulative Probability', linewidth=1, color='b',
+            )
+    ax.plot(*mean_coordinate, 'bo', label='Average')
+    ax.grid(linestyle='--')
+    ax2 = ax.twinx()
+    ax2.hist(result_array, density=True, label='Probability Mass(Right)', range=[min(result_df['re_roll']), max(result_df['re_roll'])],
+             bins=15, facecolor='#2ab0ff', edgecolor='#169acf', linewidth=0.5)
+    ax.set_zorder(ax2.get_zorder() + 1)
+    ax.patch.set_visible(False)
+    ax.set_title('Simulation Result')
+
+
+    # ax.spines[['top']].set_visible(False)
+    # ax2.spines[['top']].set_visible(False)
+
+    ax.tick_params(axis='x', direction='in', which='both')
+    ax.tick_params(axis='y', direction='in', which='both')
+    ax2.tick_params(axis='x', direction='in', which='both')
+    ax2.tick_params(axis='y', direction='in', which='both')
+
+    lines, labels = ax.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax.set_xlabel('N re-roll')
+    ax.set_ylabel('Cumulative Probabilty')
+    ax2.set_ylabel('Probability')
+    ax.legend(lines + lines2, labels + labels2, loc=0)
+
+    plt.show()
+    # st.write(probability_chart.style.pipe(make_pretty), use_container_width=True)
+
     st.pyplot(fig)
     # st.write(probability_chart.style.pipe(make_pretty), use_container_width=True)
 
