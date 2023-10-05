@@ -1,4 +1,4 @@
-import pandas as pd
+﻿import pandas as pd
 import numpy as np
 import math
 import matplotlib.pyplot as plt
@@ -106,7 +106,7 @@ def cal_prob_target(lv, piece_cost, finding_n, already_sold_ratio, n_slot=5):
 if __name__ == "__main__":
 
     st.set_page_config(
-        page_title="Roll Expectation",
+        page_title="TFT Re-Roll Expectation",
         page_icon="👋",
     )
 
