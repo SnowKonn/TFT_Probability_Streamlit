@@ -18,7 +18,7 @@ others_lv_set = 4
 find_info_dict = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
 competitors_n = 0
 dead_pl_n = 7
-no_head_rate = 0.9
+no_head_rate = 0.85
 
 
 def set_find_info_dict(cost: int, n: int, init=False):
@@ -107,8 +107,8 @@ if __name__ == "__main__":
     )
     st.divider()
 
-    max_pieces_chart = pd.read_excel('Data/Probability Chart_season_10.xlsx', 'Max N', index_col=0)
-    probability_chart = pd.read_excel('Data/Probability Chart_season_10.xlsx', 'Probability Cost', index_col=0)
+    max_pieces_chart = pd.read_excel('Data/Probability Chart.xlsx', 'Max N', index_col=0)
+    probability_chart = pd.read_excel('Data/Probability Chart.xlsx', 'Probability Cost', index_col=0)
     probability_chart.index.name = 'Level'
     probability_chart.columns.name = 'Cost'
 
@@ -134,13 +134,13 @@ if __name__ == "__main__":
     with col2:
         lv_option = st.selectbox(
             "Select Your Lv",
-            (1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+            (1, 2, 3, 4, 5, 6, 7, 8, 9),
             key='Level',
             index=6
         )
         lv_option_others = st.selectbox(
             "Other player's average Lv",
-            (1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+            (1, 2, 3, 4, 5, 6, 7, 8, 9),
             key='Level_others',
             index=6
         )

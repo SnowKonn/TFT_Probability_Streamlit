@@ -120,12 +120,12 @@ if __name__ == "__main__":
         Good luck, everyone!:star: """
     )
     st.divider()
-    max_pieces_chart = pd.read_excel('Data/Probability Chart_season_10.xlsx', 'Max N', index_col=0)
-    probability_chart = pd.read_excel('Data/Probability Chart_season_10.xlsx', 'Probability Cost', index_col=0)
+    max_pieces_chart = pd.read_excel('Data/Probability Chart.xlsx', 'Max N', index_col=0)
+    probability_chart = pd.read_excel('Data/Probability Chart.xlsx', 'Probability Cost', index_col=0)
     probability_chart.index.name = 'Level'
     probability_chart.columns.name = 'Cost'
     # st.write(probability_chart.style.pipe(make_pretty), use_container_width=True)
-    # print(probability_chart)
+
     if "visibility" not in st.session_state:
         st.session_state.visibility = "visible"
         st.session_state.disabled = False
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     with col2:
         lv_option = st.selectbox(
             "Select Your Lv",
-            (1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+            (1, 2, 3, 4, 5, 6, 7, 8, 9),
             key='Level',
             index=6
         )
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     lv = lv_option
     piece_cost = cost_option
     finding_n = finding_n_option
-    already_sold_ratio = 0.25 * float(already_sold_ratio_option)
+    already_sold_ratio = 0.15 * float(already_sold_ratio_option)
     probability_target, fig, ax, stats = cal_prob_target(lv, piece_cost, finding_n, already_sold_ratio, n_slot=5)
 
     st.markdown(
