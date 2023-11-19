@@ -163,12 +163,12 @@ if __name__ == "__main__":
             traits_activation = trait_activation_df.set_index('Trait name').to_dict('index')
             traits_score = trait_score_df.set_index('Trait name').to_dict('index')
 
-            # 각 조합의 시너지 점수를 계산하고 상위 5개를 반환합니다.
+            # 각 조합의 시너지 점수를 계산하고 상위 10개를 반환합니다.
             combination_scores = [
                 (combo, calculate_synergy_score(combo, traits_activation, traits_score, target_champ, target_trait))
                 for combo in all_combinations
             ]
-            top_5_combinations = sorted(combination_scores, key=lambda x: x[1], reverse=True)[:5]
+            top_5_combinations = sorted(combination_scores, key=lambda x: x[1], reverse=True)[:10]
 
             number_comp_rank = st.select_slider(
                 'Select the number of recommended comp',
